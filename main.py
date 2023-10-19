@@ -17,20 +17,22 @@ if __name__ == '__main__':
     # 批量输入进程信息
     print("批量输入进程信息")
     init_process_num = int(input("请输入进程数量："))
-    print("请依次输入进程信息：pid, service_time, priority")
+    print("请依次输入进程信息：pid, service_time")
     for i in range(init_process_num):
-        pid, service_time, priority = map(int, input().split())
-        arrive_time = 0
-        # pid不能相同
-        flag = True
-        for p in queue.processes:
-            if p.pid == pid:
-                print("pid = {}的进程已存在，请重新输入".format(pid))
-                flag = False
+        while True:
+            pid, service_time = map(int, input().split())
+            priority = 0
+            arrive_time = 0
+            # pid不能相同
+            flag = True
+            for p in queue.processes:
+                if p.pid == pid:
+                    print("pid = {}的进程已存在，请重新输入".format(pid))
+                    flag = False
+                    break
+            if flag:
+                queue.put(Process(pid, arrive_time, service_time, priority))
                 break
-        if flag:
-            assert len(queue.processes) < queue.size, "队列已满，无法添加新进程"
-            queue.put(Process(pid, arrive_time, service_time, priority))
     print("========================================")
 
     print("开始执行")
@@ -59,9 +61,19 @@ if __name__ == '__main__':
                 print("--------------------")
             elif op == 4:  # 添加进程
                 arrive_time = queue.time
-                pid, service_time, priority = map(int, input(
-                    "请输入进程信息：pid, service_time, priority -- 注意, priority 需要小于 {}\n".format(q_number)).split())
-                queue.put(Process(pid, arrive_time, service_time, priority))
+                priority = 0
+                flag = True
+                while True:
+                    pid, service_time = map(int, input(
+                        "请输入进程信息：pid, service_time\n".format(q_number)).split())
+                    for p in queue.processes:
+                        if p.pid == pid:
+                            print("pid = {}的进程已存在，请重新输入".format(pid))
+                            flag = False
+                            break
+                    if flag:
+                        queue.put(Process(pid, arrive_time, service_time, priority))
+                        break
                 print("--------------------")
 
         if op == 1:  # 执行一次
