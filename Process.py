@@ -76,7 +76,7 @@ class Process:
         elif self.state == ProcessState.Finished:
             t = "Finished"
 
-        return "Process(pid= {}, arrival_time= {}, burst_time= {}, priority= {}, state= {})".format(
+        return "Process(pid= {}, 到达时间= {}, 需要服务时间= {}, 当前优先级= {}, 状态= {})".format(
             self.pid, self.arrival_time, self.burst_time, self.priority, t
         )
 

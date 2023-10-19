@@ -70,7 +70,7 @@ class ProcessQueue:
 
         # 如果执行完毕，放入完成队列
         if self.doing.is_done():
-            self.processes.remove(q)
+            self.processes.remove(self.doing)
             self.processes_done.append(self.doing)
             self.doing = None
 
@@ -86,13 +86,27 @@ class ProcessQueue:
 
         self.time += 1
 
+    def get(self, pid):
+        """
+        获取指定pid的进程
+        :param pid:     进程pid
+        :return:        进程
+        """
+        for p in self.processes:
+            if p.pid == pid:
+                return p
+        for p in self.processes_done:
+            if p.pid == pid:
+                return p
+        return None
+
     def show(self):
         """
         查看当前进程执行情况
         """
-        # 第0级队列
         print("多级反馈队列")
         print("当前时间：{} | 当前执行进程 pid = {}".format(self.time, self.doing.pid if self.doing is not None else None))
+        print("等待队列：{} | 完成队列：{}".format(len(self.processes), len(self.processes_done)))
         print("=" * 50)
         for i in range(len(self.queues)):
             print("第 {} 级队列 | 队列进程数：{} | 时间片：{}".format(i, self.queues[i].qsize(), self.time_slice[i]))
@@ -112,24 +126,4 @@ if __name__ == '__main__':
     p2 = Process(2, 2, 10, 0)
     q.put(p1)
     q.put(p2)
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
-    q.step()
     q.show()
