@@ -53,7 +53,7 @@ class ProcessQueue:
             if self.is_preemptive:
                 for i in range(len(self.queues)):
                     if not self.queues[i].empty() and i < self.doing.priority:
-                        self.doing.end_once_service(0)   # 结束一次服务
+                        self.doing.end_once_service(0)  # 结束一次服务
                         self.queues[self.doing.priority].put(self.doing)
                         self.doing = self.queues[i].get()
                         flag = True
@@ -104,20 +104,34 @@ class ProcessQueue:
         """
         查看当前进程执行情况
         """
-        print("多级反馈队列")
-        print("当前时间：{} | 当前执行进程 pid = {}".format(self.time, self.doing.pid if self.doing is not None else None))
+        print(
+            "当前时间：{} | 当前执行进程 pid = {}".format(self.time, self.doing.pid if self.doing is not None else None))
         print("等待队列：{} | 完成队列：{}".format(len(self.processes), len(self.processes_done)))
         print("=" * 50)
         for i in range(len(self.queues)):
             print("第 {} 级队列 | 队列进程数：{} | 时间片：{}".format(i, self.queues[i].qsize(), self.time_slice[i]))
-            print("-" * 50)
-            print("|", end=" ")
+            print("    " + "-" * len(self.queues[i].queue) * 4)
+            print("头  |", end=" ")
             for content in self.queues[i].queue:
                 print("{} |".format(content.pid), end=" ")
-            print()
-            print("-" * 50)
+            print(" 尾")
+            print("    " + "-" * len(self.queues[i].queue) * 4)
             print()
 
+    def showReadyProcess(self):
+        """
+        查看就绪队列
+        """
+        print("就绪队列：")
+        for task in self.processes:
+            print(task)
+
+    def showFinishProcess(self):
+        """
+        查看完成队列
+        """
+        for task in self.processes_done:
+            print(task)
 
 
 if __name__ == '__main__':
@@ -126,4 +140,7 @@ if __name__ == '__main__':
     p2 = Process(2, 2, 10, 0)
     q.put(p1)
     q.put(p2)
+    q.put(p1)
+    q.put(p1)
+    q.put(p1)
     q.show()
