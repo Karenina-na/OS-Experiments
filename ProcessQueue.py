@@ -31,6 +31,7 @@ class ProcessQueue:
         :param process: 进程
         """
         assert process.priority < len(self.queues)
+        process.state = process.state.Ready
         self.processes.append(process)
         self.queues[process.priority].put(process)
 
@@ -70,6 +71,7 @@ class ProcessQueue:
 
         # 如果执行完毕，放入完成队列
         if self.doing.is_done():
+            print("<========= 进程 pid = {} 执行完毕，当前时间：{} =========>".format(self.doing.pid, self.time))
             self.processes.remove(self.doing)
             self.processes_done.append(self.doing)
             self.doing = None
@@ -110,19 +112,19 @@ class ProcessQueue:
         print("=" * 50)
         for i in range(len(self.queues)):
             print("第 {} 级队列 | 队列进程数：{} | 时间片：{}".format(i, self.queues[i].qsize(), self.time_slice[i]))
-            print("    " + "-" * len(self.queues[i].queue) * 4)
+            print("-" * 50)
             print("头  |", end=" ")
             for content in self.queues[i].queue:
                 print("{} |".format(content.pid), end=" ")
             print(" 尾")
-            print("    " + "-" * len(self.queues[i].queue) * 4)
+            print("-" * 50)
             print()
 
     def showReadyProcess(self):
         """
-        查看就绪队列
+        查看就绪进程
         """
-        print("就绪队列：")
+        print("就绪进程：")
         for task in self.processes:
             print(task)
 
@@ -130,6 +132,7 @@ class ProcessQueue:
         """
         查看完成队列
         """
+        print("完成进程：")
         for task in self.processes_done:
             print(task)
 

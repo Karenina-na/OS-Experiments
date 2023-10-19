@@ -29,6 +29,7 @@ if __name__ == '__main__':
                 flag = False
                 break
         if flag:
+            assert len(queue.processes) < queue.size, "队列已满，无法添加新进程"
             queue.put(Process(pid, arrive_time, service_time, priority))
     print("========================================")
 
@@ -65,7 +66,6 @@ if __name__ == '__main__':
 
         if op == 1:  # 执行一次
             queue.step()
-            os.system("cls")
         elif op == 0:   # 退出
             break
 

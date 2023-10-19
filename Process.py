@@ -36,8 +36,8 @@ class Process:
         :param add_priority:    优先级增加
         """
         self.once_service_time = 0
-
         self.priority += add_priority
+        self.state = ProcessState.Ready
 
     def do(self, time):
         """
