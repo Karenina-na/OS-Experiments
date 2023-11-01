@@ -171,7 +171,7 @@ class Resource:
                 if flag:
                     # 一次分配，并返回所有资源
                     for j in range(self.m):
-                        self.available[j] += self.max[i][j]
+                        self.available[j] += self.allocation[i][j]
                     visited[i] = True
                     s.append(i)
                 else:
@@ -181,7 +181,7 @@ class Resource:
                 # 回溯
                 if flag:
                     for j in range(self.m):
-                        self.available[j] -= self.max[i][j]
+                        self.available[j] -= self.allocation[i][j]
                     visited[i] = False
                     s.pop()
 
@@ -191,10 +191,10 @@ if __name__ == '__main__':
     m = int(input("请输入资源数："))
     resource = Resource(n, m)
     # resource.init()
-    resource.available = [1, 5, 2]
-    resource.max = [[7, 5, 3], [3, 2, 2], [9, 0, 2], [2, 2, 2], [4, 3, 3]]
-    resource.allocation = [[0, 1, 0], [2, 0, 0], [3, 0, 2], [2, 1, 1], [0, 0, 2]]
-    resource.need = [[7, 4, 3], [1, 2, 2], [6, 0, 0], [0, 1, 1], [4, 3, 1]]
+    resource.available = [3, 3, 2]
+    resource.max = [[7, 7, 3], [3, 3, 4], [9, 1, 2], [2, 3, 3], [4, 3, 4]]
+    resource.allocation = [[0, 2, 0], [2, 1, 0], [3, 0, 2], [2, 1, 2], [0, 1, 2]]
+    resource.need = [[7, 5, 3], [1, 2, 4], [6, 1, 0], [0, 2, 1], [4, 2, 2]]
     resource.isFinish = [False, False, False, False, False]
 
     print(resource.available)
@@ -204,7 +204,18 @@ if __name__ == '__main__':
     print(resource.isFinish)
 
     resource.show()
-
-    resource.verify(1, [1, 0, 2])  # true，p1->p3->p0->p2->p4 | p1->p3->p2->p0->p4
-    # resource.verify(0, [3, 3, 2])
+    resource.verify(1, [0, 0, 0])
+    """
+    P3->P1->P0->P2->P4
+	P3->P1->P0->P4->P2
+	P3->P1->P2->P0->P4
+	P3->P1->P2->P4->P0
+	P3->P1->P4->P0->P2
+	P3->P1->P4->P2->P0
+	P3->P4->P1->P0->P2
+	P3->P4->P1->P2->P0
+    """
     resource.show()
+
+    resource.safe()
+    print(resource.flag)
