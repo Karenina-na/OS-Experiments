@@ -17,6 +17,9 @@ class Resource:
         self.need = [[0 for i in range(m)] for j in range(n)]  # 需求
         self.isFinish = [False for i in range(n)]  # 是否完成
 
+        self.flag = False  # 是否安全
+        self.safe_list = []  # 安全序列
+
     def init(self):
         """
         初始化
@@ -24,14 +27,17 @@ class Resource:
         """
         print("请输入可用资源向量：")
         self.available = [int(i) for i in input().split()]
+        assert len(self.available) == self.m, "可用资源数与资源数不匹配！"
 
         print("请输入最大需求矩阵：")
         for i in range(self.n):
             self.max[i] = [int(i) for i in input().split()]
+        assert len(self.max[0]) == self.m, "最大需求矩阵与资源数不匹配！"
 
         print("请输入T0时刻已分配矩阵：")
         for i in range(self.n):
             self.allocation[i] = [int(i) for i in input().split()]
+        assert len(self.allocation[0]) == self.m, "已分配矩阵与资源数不匹配！"
 
         for i in range(self.n):
             for j in range(self.m):
@@ -85,7 +91,99 @@ class Resource:
 
         print(df)
 
+    def verify(self, index, request):
+        """
+        验证请求是否合法
+        :param index: 进程索引
+        :param request: [1, 2, 3]
+        :return: bool
+        """
 
+        assert len(request) == self.m, "请求资源数与资源数不匹配！"
+
+        # 验证请求是否超过最大需求
+        for i in range(self.m):
+            if request[i] > self.need[index][i]:
+                print("请求超过最大需求！不允许分配！")
+                return False
+
+        # 验证请求是否超过可用资源
+        for i in range(self.m):
+            if request[i] > self.available[i]:
+                print("请求超过可用资源！不允许分配！")
+                return False
+
+        # 更改数据，验证安全性
+        for i in range(self.m):
+            self.available[i] -= request[i]
+            self.allocation[index][i] += request[i]
+            self.need[index][i] -= request[i]
+
+        self.safe()
+        if not self.flag:
+            print("进程 " + str(index) + " 请求 " + str(request) + " 不安全！不允许分配！")
+            # roll back
+            for i in range(self.m):
+                self.available[i] += request[i]
+                self.allocation[index][i] -= request[i]
+                self.need[index][i] += request[i]
+            return False
+        else:
+            print("请求安全，可用的安全序列为：")
+            for seq in self.safe_list:
+                print("\t" + seq)
+            return True
+
+    def safe(self):
+        """
+        验证当前状态是否安全
+        :return: bool
+        """
+        self.flag = False
+        self.safe_list = []
+        visited = [False for i in range(self.n)]
+        s = []
+        self.dfs(visited, s)
+
+    def dfs(self, visited, s):
+        """
+        回溯法
+        :return:
+        """
+
+        if len(s) == self.n:
+            self.flag = True
+            seq = ""
+            for i in range(len(s) - 1):
+                seq += "P" + str(s[i]) + "->"
+            seq += "P" + str(s[-1])
+            self.safe_list.append(seq)
+            return
+
+        for i in range(len(visited)):
+            if not visited[i]:
+                # 检查是否系统持有足够的资源来分配给进程Pi
+                flag = True
+                for j in range(self.m):
+                    if self.need[i][j] > self.available[j]:
+                        flag = False
+                        break
+                if flag:
+                    # 一次分配，并返回所有资源
+                    for j in range(self.m):
+                        self.available[j] += self.max[i][j]
+                    visited[i] = True
+                    s.append(i)
+                else:
+                    continue
+                # 递归
+                self.dfs(visited, s)
+                # 回溯
+                if flag:
+                    for j in range(self.m):
+                        self.available[j] -= self.max[i][j]
+                    visited[i] = False
+                    s.pop()
 
 
 if __name__ == '__main__':
@@ -93,16 +191,20 @@ if __name__ == '__main__':
     m = int(input("请输入资源数："))
     resource = Resource(n, m)
     # resource.init()
-    resource.available = [12, 6, 8]
-    resource.max = [[6, 4, 3], [3, 2, 4], [9, 0, 3], [2, 2, 2], [3, 4, 3]]
-    resource.allocation = [[1, 1, 0], [2, 0, 1], [4, 0, 2], [2, 1, 1], [0, 1, 2]]
-    resource.need = [[5, 3, 3], [1, 2, 3], [5, 0, 1], [0, 1, 1], [3, 3, 1]]
+    resource.available = [1, 5, 2]
+    resource.max = [[7, 5, 3], [3, 2, 2], [9, 0, 2], [2, 2, 2], [4, 3, 3]]
+    resource.allocation = [[0, 1, 0], [2, 0, 0], [3, 0, 2], [2, 1, 1], [0, 0, 2]]
+    resource.need = [[7, 4, 3], [1, 2, 2], [6, 0, 0], [0, 1, 1], [4, 3, 1]]
     resource.isFinish = [False, False, False, False, False]
 
-    # print(resource.available)
-    # print(resource.max)
-    # print(resource.allocation)
-    # print(resource.need)
-    # print(resource.isFinish)
+    print(resource.available)
+    print(resource.max)
+    print(resource.allocation)
+    print(resource.need)
+    print(resource.isFinish)
 
+    resource.show()
+
+    resource.verify(1, [1, 0, 2])  # true，p1->p3->p0->p2->p4 | p1->p3->p2->p0->p4
+    # resource.verify(0, [3, 3, 2])
     resource.show()
