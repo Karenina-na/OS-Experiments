@@ -11,6 +11,7 @@ class Resource:
         """
         self.n = n
         self.m = m
+        self.resource = [0 for i in range(m)]  # 资源总数
         self.available = [0 for i in range(m)]  # 可用资源
         self.max = [[0 for i in range(m)] for j in range(n)]  # 最大需求
         self.allocation = [[0 for i in range(m)] for j in range(n)]  # 已分配
@@ -25,9 +26,9 @@ class Resource:
         初始化
         :return: None
         """
-        print("请输入可用资源向量：")
-        self.available = [int(i) for i in input().split()]
-        assert len(self.available) == self.m, "可用资源数与资源数不匹配！"
+        print("请输入各类资源总数向量：")
+        self.resource = [int(i) for i in input().split()]
+        assert len(self.available) == self.m, "资源数与资源数不匹配！"
 
         print("请输入最大需求矩阵：")
         for i in range(self.n):
@@ -42,6 +43,11 @@ class Resource:
         for i in range(self.n):
             for j in range(self.m):
                 self.need[i][j] = self.max[i][j] - self.allocation[i][j]
+
+        for i in range(self.m):
+            self.available[i] = self.resource[i]
+            for j in range(self.n):
+                self.available[i] -= self.allocation[j][i]
 
         print("初始化成功！--------------------------")
 
@@ -168,18 +174,16 @@ class Resource:
                     if self.need[i][j] > self.available[j]:
                         flag = False
                         break
+
+                # 一次分配，并返回所有资源
                 if flag:
-                    # 一次分配，并返回所有资源
                     for j in range(self.m):
                         self.available[j] += self.allocation[i][j]
                     visited[i] = True
                     s.append(i)
-                else:
-                    continue
-                # 递归
-                self.dfs(visited, s)
-                # 回溯
-                if flag:
+                    # 递归
+                    self.dfs(visited, s)
+                    # 回溯
                     for j in range(self.m):
                         self.available[j] -= self.allocation[i][j]
                     visited[i] = False
@@ -206,7 +210,7 @@ if __name__ == '__main__':
     resource.show()
     resource.verify(1, [0, 0, 0])
     """
-    P3->P1->P0->P2->P4
+	P3->P1->P0->P2->P4
 	P3->P1->P0->P4->P2
 	P3->P1->P2->P0->P4
 	P3->P1->P2->P4->P0
