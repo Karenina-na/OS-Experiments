@@ -26,7 +26,6 @@ class PageTable:
         page_number = virtual_address // self.page_size
         page_offset = virtual_address % self.page_size
         if page_number >= self.page_length:
-            print("地址越界")
             return -1
         physical_address = self.page_table[page_number] * self.page_size + page_offset
         return physical_address
@@ -66,7 +65,10 @@ class PageTable:
                     if counter >= self.page_length:
                         break
 
-                break
+                # 如果还是没有分配完，说明物理内存不足
+                if counter >= self.page_length:
+                    return False
+                return True
 
             else:
                 if physical_memory_table[page_number] == -1:
@@ -76,6 +78,8 @@ class PageTable:
                     flag = 0
                 else:
                     flag += 1
+
+        return True
 
     def free_memory(self, physical_memory_table):
         """
