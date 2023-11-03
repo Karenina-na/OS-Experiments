@@ -66,8 +66,9 @@ class PageTable:
                         break
 
                 # 如果还是没有分配完，说明物理内存不足
-                if counter >= self.page_length:
+                if counter < self.page_length:
                     return False
+
                 return True
 
             else:
@@ -100,6 +101,8 @@ class PageTable:
                 physical_memory_table[right] = -1
             right -= 1
 
+        self.page_table = []
+        self.page_length = 0
         return True
 
 
